@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRISP-DM Y SCRUM (K-NN)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .course-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .team-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .team-member {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .phase {
+            display: flex;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .phase-number {
+            position: absolute;
+            left: 30px;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        .phase-content {
+            background: #f8f9fa;
+            margin-left: 80px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            flex: 1;
+            border-left: 5px solid #667eea;
+        }
+
+        .phase-with-image {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .phase-image {
+            background: #e9ecef;
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .phase h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .phase ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .phase li {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+            color: #495057;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .phase li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .phase li:last-child {
+            border-bottom: none;
+        }
+
+        .knn-explanation {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .knn-explanation h2 {
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .phase-with-image {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .phase-number {
+                left: 0;
+            }
+            
+            .phase-content {
+                margin-left: 60px;
+            }
+            
+            .team-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CRISP-DM Y SCRUM (K-NN)<br>K-NEAREST NEIGHBORS</h1>
+            
+            <div class="course-info">
+                <h2>ASIGNATURA: CONSTRUCCIÓN DE SOFTWARE</h2>
+                <h3>NOMBRE GRUPO: WOODY</h3>
+                <p><strong>Docente:</strong> Ing. Espetia Huamanga Hugo</p>
+            </div>
+
+            <div class="team-info">
+                <div class="team-member">
+                    <strong>Saldivar Zamora, Nahun Jose</strong><br>
+                    Participación: 100%
+                </div>
+                <div class="team-member">
+                    <strong>Núñez Enriquez Axel Rolando</strong><br>
+                    Participación: 100%
+                </div>
+                <div class="team-member">
+                    <strong>Huaman Peña Steve Yunior</strong><br>
+                    Participación: 100%
+                </div>
+                <div class="team-member">
+                    <strong>Quispirroca Benitez Daniel Benjamin</strong><br>
+                    Participación: 100%
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <!-- Fase 1 -->
+            <div class="phase">
+                <div class="phase-number">1</div>
+                <div class="phase-content">
+                    <h3>FASE 1: COMPRENSIÓN DEL NEGOCIO</h3>
+                    <ul>
+                        <li>Desarrollar sistema de recomendación de películas personalizado</li>
+                        <li>Mejorar experiencia de usuario y engagement</li>
+                        <li>Aumentar descubrimiento de contenido relevante</li>
+                        <li>Resolver sobrecarga de opciones (4760 películas)</li>
+                        <li>Optimizar catálogo mediante recomendaciones inteligentes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Fase 2 -->
+            <div class="phase">
+                <div class="phase-number">2</div>
+                <div class="phase-content">
+                    <h3>FASE 2: COMPRENSIÓN DE LOS DATOS</h3>
+                    <ul>
+                        <li>Dataset: 4760 películas con metadatos completos</li>
+                        <li>Características: género, idioma, presupuesto, popularidad</li>
+                        <li>1164 combinaciones de géneros diferentes</li>
+                        <li>37 idiomas representados</li>
+                        <li>Ratings en escala 1.0 a 10.0</li>
+                        <li>Datos estructurados con campos anidados (JSON)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Fase 3 -->
+            <div class="phase">
+                <div class="phase-number">3</div>
+                <div class="phase-content">
+                    <h3>FASE 3: PREPARACIÓN DE LOS DATOS</h3>
+                    <ul>
+                        <li>Extracción de campos anidados (producción, países)</li>
+                        <li>Manejo de valores faltantes</li>
+                        <li>Normalización de formatos de texto</li>
+                        <li>Ingeniería de características numéricas y de texto</li>
+                        <li>Creación de score ponderado</li>
+                        <li>Vectorización TF-IDF para análisis de similitud</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Fase 4 -->
+            <div class="phase">
+                <div class="phase-number">4</div>
+                <div class="phase-content phase-with-image">
+                    <div>
+                        <h3>FASE 4: MODELADO (K-NN)</h3>
+                        <ul>
+                            <li><strong>Algoritmo:</strong> K-Nearest Neighbors con métrica coseno</li>
+                            <li><strong>Enfoque:</strong> Filtrado colaborativo basado en usuarios</li>
+                            <li><strong>Arquitectura:</strong> Matriz de similitud entre usuarios</li>
+                            <li><strong>Búsqueda de vecinos:</strong> k usuarios más similares</li>
+                            <li><strong>Predicción:</strong> Promedio ponderado por similitud</li>
+                            <li><strong>Hiperparámetros:</strong> k optimizado automáticamente</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fase 5 -->
+            <div class="phase">
+                <div class="phase-number">5</div>
+                <div class="phase-content phase-with-image">
+                    <div>
+                        <h3>FASE 5: EVALUACIÓN</h3>
+                        <ul>
+                            <li><strong>Similitud Promedio:</strong> 6.6% (objetivo >30%)</li>
+                            <li><strong>Usuarios Aislados:</strong> 100% (objetivo <20%)</li>
+                            <li><strong>Cobertura:</strong> 0.52% (objetivo >50%)</li>
+                            <li><strong>k Óptimo:</strong> 3 (subóptimo por sparsity)</li>
+                            <li><strong>Problema Principal:</strong> Alta sparsity (1.14% densidad)</li>
+                            <li><strong>Consecuencia:</strong> Recomendaciones limitadas</li>
+                        </ul>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Fase 6 -->
+            <div class="phase">
+                <div class="phase-number">6</div>
+                <div class="phase-content phase-with-image">
+                    <div>
+                        <h3>FASE 6: DESPLIEGUE</h3>
+                        <ul>
+                            <li><strong>Arquitectura:</strong> API REST para recomendaciones</li>
+                            <li><strong>Integración:</strong> Interfaz de usuario + sistema de feedback</li>
+                            <li><strong>Escalabilidad:</strong> Optimización para grandes volúmenes</li>
+                            <li><strong>Mantenimiento:</strong> Re-entrenamiento periódico</li>
+                            <li><strong>Monitoreo:</strong> Drift de datos y concepto</li>
+                            <li><strong>Actualización:</strong> Hiperparámetros según comportamiento</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="knn-explanation">
+            <h2>¿CÓMO FUNCIONA K-NN EN NUESTRO SISTEMA?</h2>
+            <p><strong>"Encuentra usuarios similares a ti y recomienda películas que a ellos les gustaron"</strong></p>
+            <p>K-NN busca patrones de similitud entre usuarios basándose en sus ratings históricos</p>
+        </div>
+    </div>
+
+    <script>
+        // Script para manejar la carga de imágenes
+        document.querySelectorAll('.phase-image').forEach(placeholder => {
+            placeholder.addEventListener('click', function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                
+                input.onchange = function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            placeholder.innerHTML = `<img src="${event.target.result}" style="max-width: 100%; border-radius: 5px;" alt="Imagen de la fase">`;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                
+                input.click();
+            });
+        });
+    </script>
+</body>
+</html>
